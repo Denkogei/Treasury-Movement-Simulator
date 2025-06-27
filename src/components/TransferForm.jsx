@@ -5,70 +5,124 @@ function TransferForm({ accounts, onTransfer }) {
   const [to, setTo] = useState('');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
-  const [futureDate, setFutureDate] = useState('');
+  const [simulationOption, setSimulationOption] = useState('0'); // 0 = Today
+
+  // Compute the actual date based on simulationOption
+  const computedDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + parseInt(simulationOption));
+    return date.toLocaleDateString('en-CA');
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!from || !to || !amount || from === to) {
-      alert('Invalid transfer data');
-      return;
-    }
 
-    onTransfer({ from, to, amount: parseFloat(amount), note, futureDate });
+    const futureDateString = computedDate();
+
+    onTransfer({
+      from,
+      to,
+      amount: parseFloat(amount),
+      note,
+      futureDate: futureDateString,
+    });
+
+    // Reset form
+    setFrom('');
+    setTo('');
     setAmount('');
     setNote('');
-    setFutureDate('');
+    setSimulationOption('0');
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow mb-6">
+    <div className="bg-white p-4 rounded shadow mt-6">
       <h2 className="text-lg font-semibold mb-4">Transfer Funds</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <select className="p-2 border rounded" value={from} onChange={(e) => setFrom(e.target.value)}>
-          <option value="">From Account</option>
-          {accounts.map((acc) => (
-            <option key={acc.name} value={acc.name}>
-              {acc.name} ({acc.currency})
-            </option>
-          ))}
-        </select>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block mb-1">From Account</label>
+          <select
+            className="w-full p-2 border rounded"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            required
+          >
+            <option value="">Select Account</option>
+            {accounts.map((acc) => (
+              <option key={acc.name} value={acc.name}>
+                {acc.name} ({acc.currency}) - {acc.balance.toFixed(2)}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <select className="p-2 border rounded" value={to} onChange={(e) => setTo(e.target.value)}>
-          <option value="">To Account</option>
-          {accounts.map((acc) => (
-            <option key={acc.name} value={acc.name}>
-              {acc.name} ({acc.currency})
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="block mb-1">To Account</label>
+          <select
+            className="w-full p-2 border rounded"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            required
+          >
+            <option value="">Select Account</option>
+            {accounts.map((acc) => (
+              <option key={acc.name} value={acc.name}>
+                {acc.name} ({acc.currency}) - {acc.balance.toFixed(2)}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <input
-          type="number"
-          className="p-2 border rounded"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
+        <div>
+          <label className="block mb-1">Amount</label>
+          <input
+            type="number"
+            className="w-full p-2 border rounded"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            required
+            min="0.01"
+            step="0.01"
+          />
+        </div>
 
-        <input
-          type="text"
-          className="p-2 border rounded"
-          placeholder="Note (optional)"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-        />
+        <div>
+          <label className="block mb-1">Note (Optional)</label>
+          <input
+            type="text"
+            className="w-full p-2 border rounded"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+        </div>
 
-        <input
-          type="date"
-          className="p-2 border rounded"
-          value={futureDate}
-          onChange={(e) => setFutureDate(e.target.value)}
-        />
-      </div>
-      <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-        Transfer
-      </button>
-    </form>
+        <div className="md:col-span-2">
+          <label className="block mb-1">Simulate Transfer Date</label>
+          <select
+            className="w-full p-2 border rounded"
+            value={simulationOption}
+            onChange={(e) => setSimulationOption(e.target.value)}
+          >
+            <option value="0">Today</option>
+            <option value="1">Tomorrow</option>
+            <option value="3">In 3 Days</option>
+            <option value="7">In 7 Days</option>
+          </select>
+          <p className="text-sm text-gray-500 mt-1">
+            Will process on: <span className="font-medium">{computedDate()}</span>
+          </p>
+        </div>
+
+        <div className="md:col-span-2 text-right">
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          >
+            Submit Transfer
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 
