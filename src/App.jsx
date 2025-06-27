@@ -34,6 +34,10 @@ function App() {
       return;
     }
 
+    // Get today's local date in YYYY-MM-DD format
+    const today = new Date();
+    const localDateString = today.toLocaleDateString('en-CA'); // "YYYY-MM-DD"
+
     const fxRate = exchangeRates[fromAccount.currency][toAccount.currency] || 1;
     const converted = fromAccount.currency === toAccount.currency
       ? amount
@@ -61,8 +65,8 @@ function App() {
       fxRate: fxRate.toFixed(2),
       converted,
       note,
-      date: futureDate || new Date().toISOString().split('T')[0],
-      future: !!futureDate && futureDate !== new Date().toISOString().split('T')[0],
+      date: futureDate || localDateString,
+      future: !!futureDate && futureDate !== localDateString,
     };
 
     setTransactions([transaction, ...transactions]);
